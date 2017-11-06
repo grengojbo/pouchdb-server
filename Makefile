@@ -8,7 +8,7 @@ PROJECT_DIR=$(shell pwd)
 TAG_VERSION=$(shell cat VERSION)
 #TAG=gcr.io/$(PROJECT)/sukie:$(TAG_VERSION)
 #TAG=g${USER_NAME}/$(PROJECT):$(TAG_VERSION)
-TAG=${USER_NAME}/$(PROJECT)-a:$(TAG_VERSION)
+TAG=${USER_NAME}/$(PROJECT)-dev:$(TAG_VERSION)
 NAME=pouchdb-server
 # where the ssh port is redirected
 SSH_PORT=$(word 2,$(subst :, ,$(shell docker port $(NAME) 22)))
@@ -21,7 +21,7 @@ URL=$(shell dinghy ip)
 #eval $(dinghy env)
 
 run: chrome
-	./bin/pouchdb-server --dir $(PROJECT_DIR)/db -o 0.0.0.0 -c $(PROJECT_DIR)/server/config.json
+	./bin/pouchdb --dir $(PROJECT_DIR)/dt -o 0.0.0.0 -c $(PROJECT_DIR)/server/config.json
 
 # build the docker image|
 #build: deps
@@ -29,7 +29,7 @@ build:
 	docker build --tag=$(TAG) .
 
 clean:
-	docker rmi $(TAG)
+	docker rmi -f $(TAG)
 
 # push the docker image up to the Google Container repository
 push:
@@ -41,11 +41,8 @@ deps:
 
 # run the nodejs application
 serve:
-	npm start
-
-serve-docker:
 	@echo "RUN command line: open http://$(URL):$(PORT)/_utils"
-	@docker run --rm -p=$(PORT) -v $(PROJECT_DIR)/db:/data -p $(PUB_PORT):$(PORT) -e "NODE_ENV=production" --name=$(NAME) $(TAG)
+	@docker run --rm -p=$(PORT) -v $(PROJECT_DIR)/data:/data -p $(PUB_PORT):$(PORT) -e "NODE_ENV=production" --name=$(NAME) $(TAG)
 
 stop-docker:
 	docker stop $(NAME)
@@ -60,33 +57,33 @@ chrome:
 	open http://localhost:$(PORT)/_utils
 
 # Start the developer shell
-shell:
-	mkdir -p ~/.config/gcloud
-	mkdir -p `pwd`/.kube
-	docker run --rm \
-		--name=$(NAME) \
-		-p=8001:8001 \
-		-p=8002:8002 \
-		-P=true \
-		-e TERM \
-		-e HOST_GID=`id -g` \
-		-e HOST_UID=`id -u` \
-		-e HOST_USER=$(USER) \
-		-e DOCKER_GID=$(DOCKER_GID) \
-		-v ~/.config/gcloud:/home/$(USER)/.config/gcloud \
-		-v ~/.appcfg_oauth2_tokens:/home/$(USER)/.appcfg_oauth2_tokens \
-		-v `pwd`/.kube:/home/$(USER)/.kube \
-		-v `pwd`/dev/nanorc:/home/$(USER)/.nanorc \
-		-v `pwd`/dev/zshrc:/home/$(USER)/.zshrc \
-		-v /usr/bin/docker:/usr/bin/docker \
-		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v `pwd`:/project \
-		-it $(TAG) /root/startup.sh
+#shell:
+#	mkdir -p ~/.config/gcloud
+#	mkdir -p `pwd`/.kube
+#	docker run --rm \
+#		--name=$(NAME) \
+#		-p=8001:8001 \
+#		-p=8002:8002 \
+#		-P=true \
+#		-e TERM \
+#		-e HOST_GID=`id -g` \
+#		-e HOST_UID=`id -u` \
+#		-e HOST_USER=$(USER) \
+#		-e DOCKER_GID=$(DOCKER_GID) \
+#		-v ~/.config/gcloud:/home/$(USER)/.config/gcloud \
+#		-v ~/.appcfg_oauth2_tokens:/home/$(USER)/.appcfg_oauth2_tokens \
+#		-v `pwd`/.kube:/home/$(USER)/.kube \
+#		-v `pwd`/dev/nanorc:/home/$(USER)/.nanorc \
+#		-v `pwd`/dev/zshrc:/home/$(USER)/.zshrc \
+#		-v /usr/bin/docker:/usr/bin/docker \
+#		-v /var/run/docker.sock:/var/run/docker.sock \
+#		-v `pwd`:/project \
+#		-it $(TAG) /root/startup.sh
 
 # Attach a new terminal to an already running dev shell
 shell-attach:
 	docker exec -it --user=$(USER) $(NAME) zsh
 
 # Attach a root terminal to an already running dev shell
-shell-attach-root:
-	docker exec -it $(NAME) bash
+shell:
+	docker run -it --rm -v $(PROJECT_DIR)/db:/data $(TAG) sh

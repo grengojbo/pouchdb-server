@@ -43,4 +43,5 @@ build/Release
 node_modules
 
 /db/*
+/data/*
 .idea

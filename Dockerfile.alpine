@@ -1,0 +1,70 @@
+FROM node:8-alpine
+
+ENV PORT 5984
+ENV HOST 0.0.0.0
+ENV appDir /app
+#ENV NODE_ENV production
+
+EXPOSE ${PORT}
+
+RUN mkdir ${appDir}
+RUN mkdir ${appDir}/logs
+RUN mkdir /data
+
+WORKDIR ${appDir}
+
+VOLUME /data
+
+ADD favicon.ico ${appDir}/favicon.ico
+ADD add-db-user.sh /usr/bin/add-db-user.sh
+RUN chmod +x /usr/bin/add-db-user.sh
+
+ADD package.json ${appDir}/
+ADD bin ${appDir}/bin
+
+ENV PATH ${appDir}/bin:${PATH}
+ENV NPM_CONFIG_LOGLEVEL warn
+#USER node
+
+#RUN apk add --update python make g++ curl binutils-gold bash
+#USER root
+#RUN chown -R nobody:nobody /usr/local/lib/node_modules
+#RUN npm install --production --unsafe-perm -g uuid tandard tape levelup leveldown
+#WORKDIR /usr/local/lib/node_modules/levelup
+#RUN npm install --build-from-source
+#
+#WORKDIR /usr/local/lib/node_modules/leveldown
+#RUN npm install --build-from-source
+#
+#WORKDIR ${appDir}
+#RUN npm install --production
+RUN apk add --update --no-cache --virtual .build-deps \
+    binutils-gold \
+    curl \
+    g++ \
+    gcc \
+    gnupg \
+    libgcc \
+    libstdc++ \
+    libc6-compat \
+    linux-headers \
+    make \
+    python && \
+#    npm install node-gyp -g --force && \
+    npm install --production --unsafe-perm -g pouchdb-server -q  && \
+#    npm rebuild bcrypt --build-from-source && \
+    npm cache clean --force && \
+    apk del .build-deps
+
+#  npm install --production -g pouchdb-server -q && \
+
+ADD server ${appDir}/server
+
+COPY server/config.example.json ${appDir}/config.json
+
+RUN apk add --update --no-cache --virtual .build-deps bash && apk del .build-deps
+
+RUN npm install --no-package-lock --production && npm cache clean --force
+
+CMD ["pouchdb-server", "--dir", "/data", "-o", "0.0.0.0", "-c", "/app/config.json"]
+#CMD ["/app/bin/pouchdb-server", "--dir", "/data", "-c", "/app/config.json"]

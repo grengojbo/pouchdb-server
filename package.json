@@ -1,23 +1,24 @@
 {
   "name": "pouchdb-server",
   "description": "A drop-in replacement for CouchDB, built on Node.js and PouchDB",
-  "homepage": "https://github.com/pouchdb/pouchdb-server",
+  "homepage": "https://github.com/grengojbo/pouchdb-server",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/pouchdb/pouchdb-server.git"
+    "url": "git://github.com/grengojbo/pouchdb-server.git"
   },
   "main": "server/index.js",
   "files": [
     "server",
-    "bin/pouchdb-server",
+    "bin/pouchdb",
     "favicon.ico"
   ],
   "bin": {
-    "pouchdb-server": "./bin/pouchdb-server"
+    "pouchdb": "./bin/pouchdb"
   },
   "version": "2.3.7",
   "dependencies": {
+    "babel-core": "^6.26.0",
     "colors": "^1.1.2",
     "corser": "~2.0.1",
     "couchdb-log-parse": "^0.0.4",

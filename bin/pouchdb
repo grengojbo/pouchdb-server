@@ -4,4 +4,5 @@
 // otherwise we break folks doing:
 // `./node_modules/pouchdb-server/bin/pouchdb-server`.
 
+require('babel-core/register');
 require('../server/index.js');
