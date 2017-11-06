@@ -7,6 +7,7 @@ ENV appDir /app
 EXPOSE ${PORT}
 
 RUN mkdir ${appDir}
+RUN mkdir ${appDir}/logs
 RUN mkdir /data
 
 WORKDIR ${appDir}
@@ -16,10 +17,12 @@ VOLUME /data
 ADD add-db-user.sh /usr/bin/add-db-user.sh
 RUN chmod +x /usr/bin/add-db-user.sh
 
-COPY server/config.json ${appDir}/config.json
+COPY server/config.example.json ${appDir}/config.json
 
 ADD package.json ${appDir}/
 ADD bin ${appDir}/
+
+ENV PATH ${appDir}/bin:${PATH}
 
 RUN apk add --no-cache --virtual .build-deps \
     binutils-gold \
@@ -31,11 +34,11 @@ RUN apk add --no-cache --virtual .build-deps \
     linux-headers \
     make \
     python && \
-  npm install && \
+  npm install --no-package-lock --production && \
   apk del .build-deps
 
 #  npm install --production -g pouchdb-server -q && \
 
 
 
-CMD ["${appDir}/bin/pouchdb-server", "--dir", "/data", "-o", "${HOST}", "-c", "${appDir}/config.json"]
+CMD ["/app/bin/pouchdb-server", "--dir", "/data", "-c", "/app/config.json"]

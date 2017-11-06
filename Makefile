@@ -2,12 +2,13 @@
 # Makefile for this application
 #
 USER_NAME=grengojbo
+ADMIN_USER=grengojbo
 PROJECT=$(shell basename $(abspath ./))
 PROJECT_DIR=$(shell pwd)
 TAG_VERSION=$(shell cat VERSION)
 #TAG=gcr.io/$(PROJECT)/sukie:$(TAG_VERSION)
 #TAG=g${USER_NAME}/$(PROJECT):$(TAG_VERSION)
-TAG=${USER_NAME}/$(PROJECT)-dev:$(TAG_VERSION)
+TAG=${USER_NAME}/$(PROJECT)-a:$(TAG_VERSION)
 NAME=pouchdb-server
 # where the ssh port is redirected
 SSH_PORT=$(word 2,$(subst :, ,$(shell docker port $(NAME) 22)))
@@ -15,10 +16,12 @@ SSH_PORT=$(word 2,$(subst :, ,$(shell docker port $(NAME) 22)))
 DOCKER_GID=$(word 3,$(subst :, ,$(shell getent group docker)))
 #default web port
 PORT=5984
+PUB_PORT=5984
+URL=$(shell dinghy ip)
 #eval $(dinghy env)
 
-run:
-	pouchdb-server --dir $(PROJECT_DIR)/db -o 0.0.0.0 -c $(PROJECT_DIR)/src/config.json
+run: chrome
+	./bin/pouchdb-server --dir $(PROJECT_DIR)/db -o 0.0.0.0 -c $(PROJECT_DIR)/server/config.json
 
 # build the docker image|
 #build: deps
@@ -41,7 +44,8 @@ serve:
 	npm start
 
 serve-docker:
-	docker run --rm -p=$(PORT) --name=$(NAME) $(TAG)
+	@echo "RUN command line: open http://$(URL):$(PORT)/_utils"
+	@docker run --rm -p=$(PORT) -v $(PROJECT_DIR)/db:/data -p $(PUB_PORT):$(PORT) -e "NODE_ENV=production" --name=$(NAME) $(TAG)
 
 stop-docker:
 	docker stop $(NAME)
@@ -53,7 +57,7 @@ project:
 
 # Open Chrome up to the right exposed port from the docker shell.
 chrome:
-	google-chrome http://localhost:$(PORT)
+	open http://localhost:$(PORT)/_utils
 
 # Start the developer shell
 shell:

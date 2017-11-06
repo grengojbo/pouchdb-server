@@ -1,13 +1,12 @@
 'use strict';
 
-var CoreLevelPouch = require('pouchdb-adapter-leveldb-core');
-var assign = Object.assign || require('object-assign');
+const CoreLevelPouch = require('pouchdb-adapter-leveldb-core');
 
 // create a PouchDb plugin from any *down database
 function customLevelAdapter(db) {
 
   function CustomLevelPouch(opts, callback) {
-    var _opts = assign({
+    const _opts = Object.assign({
       db: db
     }, opts);
 

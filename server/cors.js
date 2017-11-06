@@ -1,12 +1,12 @@
 "use strict";
 
-var corser = require('corser');
+const corser = require('corser');
 
 module.exports = function (config) {
-  var corsMiddleware;
+  let corsMiddleware;
   function corsChanged() {
     if (config.get('httpd', 'enable_cors')) {
-      var origins = config.get('cors', 'origins');
+      let origins = config.get('cors', 'origins');
       if (origins === '*') {
         origins = undefined;
       }

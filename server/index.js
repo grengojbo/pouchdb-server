@@ -248,7 +248,8 @@ function listenImpl() {
     if (getArg('proxy')) {
       logger.info('database is a proxy to ' + getArg('proxy'));
     } else if (getArg('in-memory')) {
-      logger.info('database is in-memory; no changes will be saved.');
+        logger.info('database is in-memory; no changes will be saved.');
+    }
     if (getArg('dir') !== options.dir.couchDefault) {
       logger.info('database files will be saved to ' + getArg('dir'));
     }
