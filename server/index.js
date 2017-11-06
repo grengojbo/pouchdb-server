@@ -9,7 +9,7 @@ var wordwrap = require('wordwrap');
 var killable = require('killable');
 var tailLog  = require('./logging');
 var cors     = require('./cors');
-var Promise  = require('pouchdb-promise');
+// var Promise  = require('pouchdb-promise');
 var customLevelAdapter = require('./customLevelAdapter');
 
 var PouchDB  = require('pouchdb-core')
@@ -53,13 +53,6 @@ var options = {
     info: "Use a pure in-memory database which will be deleted upon restart.",
     flag: true,
     couchName: ['pouchdb_server', 'in_memory'],
-    couchDefault: false,
-    onChange: updatePouchDB
-  },
-  'sqlite': {
-    info: "Use PouchDB over SQLite instead of LevelDOWN",
-    flag: true,
-    couchName: ['pouchdb_server', 'sqlite'],
     couchDefault: false,
     onChange: updatePouchDB
   },
@@ -140,11 +133,6 @@ var args = nomnom
     [
       "  Starts up a pouchdb-server that talks to Redis, on localhost:6379.",
       "  Requires: npm install redisdown"
-    ].join('\n'),
-    "",
-    "  pouchdb-server --sqlite",
-    [
-      "  Starts up a pouchdb-server using SQLite"
     ].join('\n')
   ].join('\n'))
   .nocolors()
@@ -222,8 +210,6 @@ function updatePouchDB() {
     PouchDB.plugin(require('pouchdb-adapter-memory'));
   } else if (getArg('level-backend')) {
     PouchDB.plugin(customLevelAdapter(require(getArg('level-backend'))));
-  } else if (getArg('sqlite')) {
-    PouchDB.plugin(require('pouchdb-adapter-node-websql'));
   } else {
     PouchDB.plugin(require('pouchdb-adapter-leveldb'));
   }
@@ -263,9 +249,6 @@ function listenImpl() {
       logger.info('database is a proxy to ' + getArg('proxy'));
     } else if (getArg('in-memory')) {
       logger.info('database is in-memory; no changes will be saved.');
-    } else if (getArg('sqlite')) {
-      logger.info('database will use sqlite3.');
-    }
     if (getArg('dir') !== options.dir.couchDefault) {
       logger.info('database files will be saved to ' + getArg('dir'));
     }

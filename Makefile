@@ -7,7 +7,7 @@ PROJECT_DIR=$(shell pwd)
 TAG_VERSION=$(shell cat VERSION)
 #TAG=gcr.io/$(PROJECT)/sukie:$(TAG_VERSION)
 #TAG=g${USER_NAME}/$(PROJECT):$(TAG_VERSION)
-TAG=g${USER_NAME}/$(PROJECT)-dev:$(TAG_VERSION)
+TAG=${USER_NAME}/$(PROJECT)-dev:$(TAG_VERSION)
 NAME=pouchdb-server
 # where the ssh port is redirected
 SSH_PORT=$(word 2,$(subst :, ,$(shell docker port $(NAME) 22)))
