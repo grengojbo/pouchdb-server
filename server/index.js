@@ -227,6 +227,29 @@ updatePouchDB();
 
 app.use(pouchDBApp);
 
+// health check
+app.get('/healthz', (req, res) => {
+  res.sendStatus(200);
+  // res.setHeader('', '');
+  res.type('text/plain').send('Ok');
+});
+
+// development error handler
+// will print stacktrace
+if (app.get('env') === 'development') {
+  app.use((err, req, res) => {
+    res.status(err.status || 500);
+    res.send();
+  });
+}
+
+// production error handler
+// no stacktraces leaked to user
+app.use((err, req, res) => {
+    res.status(err.status || 500);
+    res.send();
+});
+
 // handle listening
 let server;
 
@@ -289,3 +312,24 @@ listen();
 process.on('SIGINT', () => {
   process.exit(0);
 });
+
+// graceful shutdown
+// const callbackToPromise = require('promise-callback')
+process.on('SIGTERM', () => {
+    logger.info('SIGTERM signal received');
+    process.exit(0);
+//
+//     // close server first
+//     callbackToPromise(app.close)
+//     // than db(s)
+//         .then(() => redis.disconnect())
+//         // exit process
+//         .then(() => {
+//             logger.info('Succesfull graceful shutdown')
+//             process.exit(0)
+//         })
+//         .catch((err) => {
+//             logger.error('Server close')
+//             process.exit(-1)
+//         })
+})

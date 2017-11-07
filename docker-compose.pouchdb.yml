@@ -11,27 +11,54 @@ networks:
 #    driver: "local"
 
 services:
-  clickhouse:
+  pouchdb:
     image: grengojbo/pouchdb-server
     volumes:
       - /var/srv/storage/pouchdb:/data
       - /var/srv/config/pouchdb/config.xml:/app/config.json
+      - /var/opt/data/logs:/app/logs
     ports:
       - "5984:5984"
     networks:
       - database
     environment:
       PORT: 5984
+      NODE_ENV: production
+      #ENV NPM_CONFIG_LOGLEVEL info
+    healthcheck:
+      test: curl --fail -s http://localhost:5984/healthz || exit 1
+      #test: curl -sS http://localhost:5984/healthz
+      interval: 1m10s
+      timeout: 10s
+      retries: 3
     deploy:
       placement:
         constraints:
           - node.role == worker
+      restart_policy:
+        #condition: any
+        condition: on-failure
+        max_attempts: 5
+        delay: 5s
+      # https://docs.docker.com/compose/compose-file/#restart_policy
+      update_config:
+        parallelism: 1
+        failure_action: rollback
+        delay: 2s
+        order: start-first
+        monitor: 30s
+        max_failure_ratio: 5
+      labels:
+        - traefik.port=5984
+        - traefik.frontend.rule=Host:pouchdb.local
+        - traefik.docker.network=net
+        - traefik.enable=true
       mode: replicated
       replicas: 1
-      #resources:
-      #  limits:
-      #    cpus: '0.60'
-      #    memory: 1228M
-      #  reservations:
-      #    cpus: '0.50'
-      #    memory: 1024M
+      resources:
+        limits:
+          #cpus: '0.20'
+          memory: 1G
+        reservations:
+          #cpus: '0.20'
+          memory: 300M

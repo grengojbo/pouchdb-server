@@ -71,7 +71,7 @@ module.exports = function tailLog(path) {
         resolve(tail.unwatch.bind(tail));
       });
     });
-  }
+  };
 
   return startTailing();
 };

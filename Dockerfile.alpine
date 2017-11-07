@@ -48,6 +48,7 @@ RUN apk add --update --no-cache --virtual .build-deps \
     libstdc++ \
     libc6-compat \
     linux-headers \
+    git \
     make \
     python && \
 #    npm install node-gyp -g --force && \
