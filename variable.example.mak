@@ -1,0 +1,6 @@
+#REPO_URL="private.repo:9000"
+#USER_NAME=
+#ADMIN_USER=
+#PUB_PORT=
+#PORT=
+#NAME=

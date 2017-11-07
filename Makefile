@@ -1,23 +1,31 @@
 #
 # Makefile for this application
 #
-USER_NAME=grengojbo
-ADMIN_USER=grengojbo
+-include variable.mak
+
+REPO_URL ?= ""
+USER_NAME ?= grengojbo
+ADMIN_USER ?= grengojbo
 PROJECT=$(shell basename $(abspath ./))
 PROJECT_DIR=$(shell pwd)
 TAG_VERSION=$(shell cat VERSION)
 #TAG=gcr.io/$(PROJECT)/sukie:$(TAG_VERSION)
 #TAG=g${USER_NAME}/$(PROJECT):$(TAG_VERSION)
 TAG=${USER_NAME}/$(PROJECT)-dev:$(TAG_VERSION)
-NAME=pouchdb-server
+NAME ?= pouchdb-server
 # where the ssh port is redirected
 SSH_PORT=$(word 2,$(subst :, ,$(shell docker port $(NAME) 22)))
 #the id of the docker group
 DOCKER_GID=$(word 3,$(subst :, ,$(shell getent group docker)))
 #default web port
-PORT=5984
-PUB_PORT=5984
-URL=$(shell dinghy ip)
+PORT ?= 5984
+PUB_PORT ?= 5984
+OS := $(shell uname)
+ifeq ($(OS),Darwin)
+  URL=$(shell dinghy ip)
+else
+  URL="127.0.0.1"
+endif
 #eval $(dinghy env)
 
 run: chrome
@@ -49,7 +57,7 @@ stop-docker:
 
 # show what your project is. Useful debugging.
 project:
-	@echo $(PROJECT)
+	@echo $(PROJECT) repo: $(REPO_URL)
 	@echo TAG: $(TAG)
 
 # Open Chrome up to the right exposed port from the docker shell.
@@ -82,8 +90,11 @@ chrome:
 
 # Attach a new terminal to an already running dev shell
 shell-attach:
-	docker exec -it --user=$(USER) $(NAME) zsh
+	docker exec -it $(NAME) bash
 
 # Attach a root terminal to an already running dev shell
 shell:
-	docker run -it --rm -v $(PROJECT_DIR)/db:/data $(TAG) sh
+	docker run -it --rm -v $(PROJECT_DIR)/db:/data $(TAG) bash
+
+user-add:
+

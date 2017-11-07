@@ -11,5 +11,5 @@ docker run -d -v /data/pouchdb/:/pouchdb --hostname="pouchdb-server" --name="pou
 ADD an user:
 
 ```bash
-docker exec --it pouchdb-server add-db-user.sh <username>
+docker exec -it pouchdb-server add-db-user.sh <username>
 ```
