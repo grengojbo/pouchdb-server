@@ -21,7 +21,7 @@ URL=$(shell dinghy ip)
 #eval $(dinghy env)
 
 run: chrome
-	./bin/pouchdb --dir $(PROJECT_DIR)/dt -o 0.0.0.0 -c $(PROJECT_DIR)/server/config.json
+	./bin/pouchdb-server --dir $(PROJECT_DIR)/db -o 0.0.0.0 -c $(PROJECT_DIR)/config.json
 
 # build the docker image|
 #build: deps
@@ -42,7 +42,7 @@ deps:
 # run the nodejs application
 serve:
 	@echo "RUN command line: open http://$(URL):$(PORT)/_utils"
-	@docker run --rm -p=$(PORT) -v $(PROJECT_DIR)/data:/data -p $(PUB_PORT):$(PORT) -e "NODE_ENV=production" --name=$(NAME) $(TAG)
+	@docker run --rm -p=$(PORT) -v $(PROJECT_DIR)/db:/data -v $(PROJECT_DIR)/config.json:/app/config.json -p $(PUB_PORT):$(PORT) -e "NODE_ENV=production" --name=$(NAME) $(TAG)
 
 stop-docker:
 	docker stop $(NAME)

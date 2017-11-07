@@ -13,9 +13,7 @@ function customLevelAdapter(db) {
     CoreLevelPouch.call(this, _opts, callback);
   }
 
-  CustomLevelPouch.valid = function () {
-    return true;
-  };
+  CustomLevelPouch.valid = () => true;
   CustomLevelPouch.use_prefix = false;
 
   return function (PouchDB) {

@@ -1,26 +1,32 @@
 "use strict";
 
-var express  = require('express');
-var favicon  = require('serve-favicon');
-var path     = require('path');
-var mkdirp   = require('mkdirp');
-var nomnom   = require('nomnom');
-var wordwrap = require('wordwrap');
-var killable = require('killable');
-var tailLog  = require('./logging');
-var cors     = require('./cors');
+const express  = require('express');
+const favicon  = require('serve-favicon');
+const path     = require('path');
+const mkdirp   = require('mkdirp');
+const nomnom   = require('nomnom');
+const wordwrap = require('wordwrap');
+const killable = require('killable');
+const tailLog  = require('./logging');
+const cors     = require('./cors');
 // var Promise  = require('pouchdb-promise');
-var customLevelAdapter = require('./customLevelAdapter');
+const customLevelAdapter = require('./customLevelAdapter');
 
-var PouchDB  = require('pouchdb-core')
+const PouchDB  = require('pouchdb-core')
   .plugin(require('pouchdb-adapter-http'))
   .plugin(require('pouchdb-replication'))
   .plugin(require('pouchdb-mapreduce'))
   .plugin(require('pouchdb-find'));
 
+const terminalWrap = (text) => {
+    // 26 chars from the left of the terminal might change when new
+    // options are added
+    return wordwrap(26, 80)(text).trim();
+};
+
 // parse command line arguments
 
-var options = {
+const options = {
   port: {
     abbr: 'p',
     info: "Port on which to run the server.",
@@ -45,7 +51,7 @@ var options = {
     abbr: 'o',
     info: "The address to bind the server to.",
     couchName: ['httpd', 'bind_address'],
-    couchDefault: '127.0.0.1',
+    couchDefault: process.env.HOST || '127.0.0.1',
     onChange: rebind
   },
   'in-memory': {
@@ -96,34 +102,28 @@ var options = {
   }
 };
 
-function terminalWrap(text) {
-  // 26 chars from the left of the terminal might change when new
-  // options are added
-  return wordwrap(26, 80)(text).trim();
-}
-
 Object.keys(options).forEach(function (key) {
-  var option = options[key];
+  const option = options[key];
   if (!option.help) {
-    var d;
+    let d;
     if (option.couchName) {
-      d = "/_config/" + option.couchName.join("/")+ " which defaults to ";
+      d = `/_config/${option.couchName.join("/")} which defaults to `;
       d += option.couchDefaultAlias || option.couchDefault;
     } else {
       d = option.ultimateDefault;
     }
-    option.help = terminalWrap(option.info + " (Defaults to " + d + ").");
+    option.help = terminalWrap(`${option.info} (Defaults to ${d}).`);
   }
 });
 
-var args = nomnom
+const args = nomnom
   .script('pouchdb-server')
   .options(options)
   .help([
-    "Examples:",
-    "",
-    "  pouchdb-server --level-backend riakdown --level-prefix " +
-    "riak://localhost:8087",
+    'Examples:',
+    '',
+    '  pouchdb-server --level-backend riakdown --level-prefix ' +
+    'riak://localhost:8087',
     [
       "  Starts up a pouchdb-server that talks to Riak.",
       "  Requires: npm install riakdown"
@@ -140,9 +140,9 @@ var args = nomnom
 
 // build app
 
-var app = express();
+const app = express();
 
-var pouchDBApp = require('express-pouchdb')({
+const pouchDBApp = require('express-pouchdb')({
   configPath: getArg('config')
 });
 
@@ -154,15 +154,15 @@ function getArg(name) {
   }
 }
 
-var config = pouchDBApp.couchConfig;
-var logger = pouchDBApp.couchLogger;
+const config = pouchDBApp.couchConfig;
+const logger = pouchDBApp.couchLogger;
 
 // register defaults & change listeners
 Object.keys(options).forEach(function (key) {
-  var option = options[key];
+  const option = options[key];
 
   if (typeof option.couchDefault !== 'undefined') {
-    var args = option.couchName.concat([option.couchDefault]);
+    const args = option.couchName.concat([option.couchDefault]);
     config.registerDefault.apply(config, args);
   }
   if (option.onChange) {
@@ -174,7 +174,7 @@ Object.keys(options).forEach(function (key) {
 app.use(favicon(__dirname + '/../favicon.ico'));
 
 // logging
-var stopTailingLog, loggingReady;
+let stopTailingLog, loggingReady;
 
 function restartTailingLog() {
   if (stopTailingLog) {
@@ -184,7 +184,7 @@ function restartTailingLog() {
   if (getArg('no-stdout-logs')) {
     loggingReady = Promise.resolve();
   } else {
-    loggingReady = tailLog(config.get('log', 'file')).then(function (stop) {
+    loggingReady = tailLog(config.get('log', 'file')).then((stop) => {
       stopTailingLog = stop;
     });
   }
@@ -198,7 +198,7 @@ app.use(cors(config));
 
 // determine PouchDB instance
 function updatePouchDB() {
-  var opts = {};
+  let opts = {};
 
   opts.prefix = path.resolve(getArg('dir')) + path.sep;
   mkdirp.sync(opts.prefix);
@@ -214,7 +214,7 @@ function updatePouchDB() {
     PouchDB.plugin(require('pouchdb-adapter-leveldb'));
   }
 
-  var ThisPouchDB;
+  let ThisPouchDB;
   if (getArg('proxy')) {
     ThisPouchDB = require('http-pouchdb')(PouchDB, getArg('proxy'));
   } else {
@@ -228,25 +228,25 @@ updatePouchDB();
 app.use(pouchDBApp);
 
 // handle listening
-var server;
+let server;
 
 function listen() {
   loggingReady.then(listenImpl);
 }
 
 function listenImpl() {
-  var host = getArg('host');
-  var port = getArg('port');
+  const host = getArg('host');
+  let port = getArg('port');
   if (typeof port !== 'number') {
-    logger.warning("port must be an integer.");
+    logger.warning('port must be an integer.');
     port = options.port.couchDefault;
   }
 
-  server = app.listen(port, host, function () {
-    var address = 'http://' + host + ':' + port + '/';
-    logger.info('pouchdb-server has started on ' + address);
+  server = app.listen(port, host, () => {
+    const address = `http://${host}:${port}/`;
+    logger.info(`pouchdb-server has started on ${address}`);
     if (getArg('proxy')) {
-      logger.info('database is a proxy to ' + getArg('proxy'));
+      logger.info(`database is a proxy to ${getArg('proxy')}`);
     } else if (getArg('in-memory')) {
         logger.info('database is in-memory; no changes will be saved.');
     }
@@ -254,25 +254,25 @@ function listenImpl() {
       logger.info('database files will be saved to ' + getArg('dir'));
     }
     if (getArg('level-backend')) {
-      logger.info('using alternative backend: ' + getArg('level-backend'));
+      logger.info(`using alternative backend: ${getArg('level-backend')}`);
     }
-    var prefix = getArg('level-prefix');
+    const prefix = getArg('level-prefix');
     if (prefix) {
-      logger.info('all databases will be created with prefix: ' + prefix);
+      logger.info(`all databases will be created with prefix: ${prefix}`);
     }
-    var fauxtonUrl = address + '_utils';
-    logger.info('navigate to ' + fauxtonUrl + ' for the Fauxton UI.');
+    const fauxtonUrl = `${address}_utils`;
+    logger.info(`navigate to ${fauxtonUrl} for the Fauxton UI.`);
   });
+
   killable(server);
 
-  server.on('error', function (e) {
+  server.on('error', (e) => {
     stopTailingLog();
     if (e.code === 'EADDRINUSE') {
-      console.error('Error: Port ' + port + ' is already in use.');
-      console.error('Try another one, e.g. pouchdb-server -p ' +
-        (parseInt(port) + 1));
+      console.error(`Error: Port ${port} is already in use.`);
+      console.error(`Try another one, e.g. pouchdb-server -p ${parseInt(port) + 1}`);
     } else {
-      console.error('Uncaught error: ' + e);
+      console.error(`Uncaught error: ${e}`);
       console.error(e.stack);
     }
   });
@@ -286,6 +286,6 @@ listen();
 
 // handle exit
 
-process.on('SIGINT', function () {
+process.on('SIGINT', () => {
   process.exit(0);
 });

@@ -14,6 +14,7 @@ RUN mkdir /data
 WORKDIR ${appDir}
 
 VOLUME /data
+VOLUME ${appDir}/logs
 
 ADD package.json ${appDir}/
 ADD bin ${appDir}/bin
@@ -37,6 +38,6 @@ RUN chmod +x /usr/bin/add-db-user.sh
 ADD server ${appDir}/server
 
 
-CMD ["/app/bin/pouchdb", "--dir", "/data", "--no-color", "-o", "0.0.0.0", "-c", "/app/config.json"]
+CMD ["/app/bin/pouchdb-server", "--dir", "/data", "--no-color", "-o", "0.0.0.0", "-c", "/app/config.json"]
 #CMD ["/app/node_modules/pouchdb-server/bin/pouchdb-server", "--dir", "/data", "-o", "0.0.0.0", "-c", "/app/config.json"]
 #CMD ["/app/bin/pouchdb-server", "--dir", "/data", "-c", "/app/config.json"]

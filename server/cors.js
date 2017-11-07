@@ -4,7 +4,7 @@ const corser = require('corser');
 
 module.exports = function (config) {
   let corsMiddleware;
-  function corsChanged() {
+  const corsChanged = () => {
     if (config.get('httpd', 'enable_cors')) {
       let origins = config.get('cors', 'origins');
       if (origins === '*') {
@@ -23,7 +23,7 @@ module.exports = function (config) {
     } else {
       corsMiddleware = null;
     }
-  }
+  };
 
   [
     ['httpd', 'enable_cors', true],
@@ -33,7 +33,7 @@ module.exports = function (config) {
     ['cors', 'headers', corser.simpleRequestHeaders.concat([
       'Authorization', 'Origin', 'Referer'
     ]).join(', ')],
-  ].forEach(function (info) {
+  ].forEach((info) => {
     config.registerDefault.apply(config, info);
     config.on(info[0] + '.' + info[1], corsChanged);
   });
