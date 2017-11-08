@@ -24,6 +24,33 @@ const terminalWrap = (text) => {
     return wordwrap(26, 80)(text).trim();
 };
 
+// determine PouchDB instance
+const updatePouchDB = () => {
+    let opts = {};
+
+    opts.prefix = path.resolve(getArg('dir')) + path.sep;
+    mkdirp.sync(opts.prefix);
+
+    if (getArg('level-prefix')) {
+        opts.prefix = getArg('level-prefix');
+    }
+    if (getArg('in-memory')) {
+        PouchDB.plugin(require('pouchdb-adapter-memory'));
+    } else if (getArg('level-backend')) {
+        PouchDB.plugin(customLevelAdapter(require(getArg('level-backend'))));
+    } else {
+        PouchDB.plugin(require('pouchdb-adapter-leveldb'));
+    }
+
+    let ThisPouchDB;
+    if (getArg('proxy')) {
+        ThisPouchDB = require('http-pouchdb')(PouchDB, getArg('proxy'));
+    } else {
+        ThisPouchDB = PouchDB.defaults(opts);
+    }
+    pouchDBApp.setPouchDB(ThisPouchDB);
+};
+
 // parse command line arguments
 
 const options = {
@@ -196,33 +223,6 @@ restartTailingLog();
 // cors
 app.use(cors(config));
 
-// determine PouchDB instance
-function updatePouchDB() {
-  let opts = {};
-
-  opts.prefix = path.resolve(getArg('dir')) + path.sep;
-  mkdirp.sync(opts.prefix);
-
-  if (getArg('level-prefix')) {
-    opts.prefix = getArg('level-prefix');
-  }
-  if (getArg('in-memory')) {
-    PouchDB.plugin(require('pouchdb-adapter-memory'));
-  } else if (getArg('level-backend')) {
-    PouchDB.plugin(customLevelAdapter(require(getArg('level-backend'))));
-  } else {
-    PouchDB.plugin(require('pouchdb-adapter-leveldb'));
-  }
-
-  let ThisPouchDB;
-  if (getArg('proxy')) {
-    ThisPouchDB = require('http-pouchdb')(PouchDB, getArg('proxy'));
-  } else {
-    ThisPouchDB = PouchDB.defaults(opts);
-  }
-  pouchDBApp.setPouchDB(ThisPouchDB);
-}
-
 updatePouchDB();
 
 app.use(pouchDBApp);
@@ -250,7 +250,6 @@ app.use((err, req, res) => {
     res.send();
 });
 
-// handle listening
 let server;
 
 function listen() {
