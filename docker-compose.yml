@@ -5,7 +5,16 @@ services:
     volumes:
       - '/Users/jbo/src/pouchdb-server/db:/data'
       - '/Users/jbo/src/pouchdb-server/config.json:/app/config.json'
+      - '/Users/jbo/src/pouchdb-server/logs:/app/logs'
     ports:
       - '5984:5984'
     environment:
       NODE_ENV: production
+      PORT: 5984
+      #ENV NPM_CONFIG_LOGLEVEL info
+    healthcheck:
+      test: curl --fail -s http://localhost:5984/healthz || exit 1
+      #test: curl -sS http://localhost:5984/healthz
+      interval: 1m10s
+      timeout: 10s
+      retries: 3

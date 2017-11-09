@@ -12,10 +12,10 @@ networks:
 
 services:
   pouchdb:
-    image: grengojbo/pouchdb-server
+    image: grengojbo/pouchdb-server:0.9
     volumes:
       - /var/srv/storage/pouchdb:/data
-      - /var/srv/config/pouchdb/config.xml:/app/config.json
+      - /var/srv/config/pouchdb/config.json:/app/config.json
       - /var/opt/data/logs:/app/logs
     ports:
       - "5984:5984"
@@ -40,12 +40,13 @@ services:
         condition: on-failure
         max_attempts: 5
         delay: 5s
-      # https://docs.docker.com/compose/compose-file/#restart_policy
+      mode: replicated
+      replicas: 1
       update_config:
         parallelism: 1
-        failure_action: rollback
+        #failure_action: rollback
         delay: 2s
-        order: start-first
+        #order: start-first
         monitor: 30s
         max_failure_ratio: 5
       labels:
@@ -53,8 +54,6 @@ services:
         - traefik.frontend.rule=Host:pouchdb.local
         - traefik.docker.network=net
         - traefik.enable=true
-      mode: replicated
-      replicas: 1
       resources:
         limits:
           #cpus: '0.20'
