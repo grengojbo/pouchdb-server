@@ -11,7 +11,7 @@ PROJECT_DIR=$(shell pwd)
 TAG_VERSION=$(shell cat VERSION)
 #TAG=gcr.io/$(PROJECT)/sukie:$(TAG_VERSION)
 #TAG=g${USER_NAME}/$(PROJECT):$(TAG_VERSION)
-TAG=${USER_NAME}/$(PROJECT)-dev:$(TAG_VERSION)
+TAG=${USER_NAME}/$(PROJECT):$(TAG_VERSION)
 NAME ?= pouchdb-server
 # where the ssh port is redirected
 SSH_PORT=$(word 2,$(subst :, ,$(shell docker port $(NAME) 22)))
@@ -28,6 +28,11 @@ else
 endif
 #eval $(dinghy env)
 
+help:
+	@echo "make clean - Clean docker image: $(TAG) and docker system prune -f"
+	@echo "make build - Build Docker image $(TAG)"
+	@echo "make push  - Publish image $(TAG)"
+
 run: chrome
 	./bin/pouchdb-server --dir $(PROJECT_DIR)/db -o 0.0.0.0 -c $(PROJECT_DIR)/config.json
 
@@ -38,6 +43,7 @@ build:
 
 clean:
 	docker rmi -f $(TAG)
+	docker system prune -f
 
 # push the docker image up to the Google Container repository
 push:
@@ -50,7 +56,7 @@ deps:
 # run the nodejs application
 serve:
 	@echo "RUN command line: open http://$(URL):$(PORT)/_utils"
-	@docker run --rm -p=$(PORT) -v $(PROJECT_DIR)/db:/data -v $(PROJECT_DIR)/config.json:/app/config.json -p $(PUB_PORT):$(PORT) -e "NODE_ENV=production" --name=$(NAME) $(TAG)
+	docker run --rm -v $(PROJECT_DIR)/db:/data -v $(PROJECT_DIR)/config.json:/app/config.json -p $(PUB_PORT):$(PORT) -e "NODE_ENV=production" --name=$(NAME) $(TAG)
 
 stop-docker:
 	docker stop $(NAME)

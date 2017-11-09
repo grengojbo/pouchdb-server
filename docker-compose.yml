@@ -1,0 +1,11 @@
+version: '3.1'
+services:
+  pouchdb-server:
+    image: 'grengojbo/pouchdb-server:0.9'
+    volumes:
+      - '/Users/jbo/src/pouchdb-server/db:/data'
+      - '/Users/jbo/src/pouchdb-server/config.json:/app/config.json'
+    ports:
+      - '5984:5984'
+    environment:
+      NODE_ENV: production
