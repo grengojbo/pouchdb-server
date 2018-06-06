@@ -2,6 +2,9 @@
 
 An image based on iojs:slim with pouchdb server and leveldown database.
 
+
+[info] navigate to http://10.10.10.14:5984/_utils for the Fauxton UI.
+
 RUN:
 
 ```bash
@@ -12,4 +15,5 @@ ADD an user:
 
 ```bash
 docker exec -it pouchdb-server add-db-user.sh <username>
+
 ```

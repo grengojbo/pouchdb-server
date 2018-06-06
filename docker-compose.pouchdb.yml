@@ -1,22 +1,24 @@
-version: "3.1"
+version: "3.3"
 
+# sudo docker volume create --driver=vsphere --name=pouchdb01@datastore2 -o size=10gb
 # docker stack deploy --compose-file=docker-compose.pouchdb.yml pouchdb
 networks:
   database:
     external:
-      name: net
+      name: net-external
 
-#volumes:
-#  pouchdb:
-#    driver: "local"
+volumes:
+    pouchdb01:
+      external:
+        name: pouchdb01@datastore2
 
 services:
-  pouchdb:
+  pouchdb01:
     image: grengojbo/pouchdb-server:0.9
     volumes:
-      - /var/srv/storage/pouchdb:/data
-      - /var/srv/config/pouchdb/config.json:/app/config.json
-      - /var/opt/data/logs:/app/logs
+      - pouchdb01:/data
+      - /var/srv/config/pouchdb01/config.json:/app/config.json
+      - /var/srv/logs/pouchdb01:/app/logs
     ports:
       - "5984:5984"
     networks:
@@ -48,12 +50,12 @@ services:
         delay: 2s
         #order: start-first
         monitor: 30s
-        max_failure_ratio: 5
-      labels:
-        - traefik.port=5984
-        - traefik.frontend.rule=Host:pouchdb.local
-        - traefik.docker.network=net
-        - traefik.enable=true
+#        max_failure_ratio: 5
+#      labels:
+#        - traefik.port=5984
+#        - traefik.frontend.rule=Host:pouchdb.local
+#        - traefik.docker.network=net-external
+#        - traefik.enable=true
       resources:
         limits:
           #cpus: '0.20'
