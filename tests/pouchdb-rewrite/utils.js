@@ -1,9 +1,9 @@
-const stuff = require('pouchdb-plugin-helper/testutils');
+const stuff = require('../testutils');
 const Rewrite = require('../../packages/node_modules/pouchdb-rewrite');
 
 const List = require('../../packages/node_modules/pouchdb-list');
 const Security = require('../../packages/node_modules/pouchdb-security');
-const Show = require('pouchdb-show');
+const Show = require('../../packages/node_modules/pouchdb-show');
 const Update = require('pouchdb-update');
 const Validation = require('pouchdb-validation');
 

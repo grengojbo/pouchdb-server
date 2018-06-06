@@ -18,39 +18,6 @@ const PouchDB  = require('pouchdb-core')
   .plugin(require('pouchdb-mapreduce'))
   .plugin(require('pouchdb-find'));
 
-const terminalWrap = (text) => {
-    // 26 chars from the left of the terminal might change when new
-    // options are added
-    return wordwrap(26, 80)(text).trim();
-};
-
-// determine PouchDB instance
-const updatePouchDB = () => {
-    let opts = {};
-
-    opts.prefix = path.resolve(getArg('dir')) + path.sep;
-    mkdirp.sync(opts.prefix);
-
-    if (getArg('level-prefix')) {
-        opts.prefix = getArg('level-prefix');
-    }
-    if (getArg('in-memory')) {
-        PouchDB.plugin(require('pouchdb-adapter-memory'));
-    } else if (getArg('level-backend')) {
-        PouchDB.plugin(customLevelAdapter(require(getArg('level-backend'))));
-    } else {
-        PouchDB.plugin(require('pouchdb-adapter-leveldb'));
-    }
-
-    let ThisPouchDB;
-    if (getArg('proxy')) {
-        ThisPouchDB = require('http-pouchdb')(PouchDB, getArg('proxy'));
-    } else {
-        ThisPouchDB = PouchDB.defaults(opts);
-    }
-    pouchDBApp.setPouchDB(ThisPouchDB);
-};
-
 // parse command line arguments
 
 const options = {
@@ -86,6 +53,13 @@ const options = {
     info: "Use a pure in-memory database which will be deleted upon restart.",
     flag: true,
     couchName: ['pouchdb_server', 'in_memory'],
+    couchDefault: false,
+    onChange: updatePouchDB
+  },
+  'sqlite': {
+    info: "Use PouchDB over SQLite instead of LevelDOWN",
+    flag: true,
+    couchName: ['pouchdb_server', 'sqlite'],
     couchDefault: false,
     onChange: updatePouchDB
   },
@@ -129,6 +103,12 @@ const options = {
   }
 };
 
+function terminalWrap(text) {
+  // 26 chars from the left of the terminal might change when new
+  // options are added
+  return wordwrap(26, 80)(text).trim();
+}
+
 Object.keys(options).forEach(function (key) {
   const option = options[key];
   if (!option.help) {
@@ -161,9 +141,14 @@ const args = nomnom
       "  Starts up a pouchdb-server that talks to Redis, on localhost:6379.",
       "  Requires: npm install redisdown"
     ].join('\n')
+      "",
+      "  pouchdb-server --sqlite",
+      [
+          "  Starts up a pouchdb-server using SQLite"
+      ].join('\n')
   ].join('\n'))
-  .nocolors()
-  .parse();
+    .nocolors()
+    .parse();
 
 // build app
 
@@ -222,6 +207,36 @@ restartTailingLog();
 
 // cors
 app.use(cors(config));
+
+// determine PouchDB instance
+function updatePouchDB() {
+  var opts = {};
+
+  opts.prefix = path.resolve(getArg('dir')) + path.sep;
+  mkdirp.sync(opts.prefix);
+
+  if (getArg('level-prefix')) {
+    opts.prefix = getArg('level-prefix');
+  }
+  if (getArg('in-memory')) {
+    PouchDB.plugin(require('pouchdb-adapter-memory'));
+  } else if (getArg('level-backend')) {
+    PouchDB.plugin(customLevelAdapter(require(getArg('level-backend'))));
+    opts.url = process.env.LEVEL_DOWN_URL; // example could be the redis url
+  } else if (getArg('sqlite')) {
+    PouchDB.plugin(require('pouchdb-adapter-node-websql'));
+  } else {
+    PouchDB.plugin(require('pouchdb-adapter-leveldb'));
+  }
+
+  var ThisPouchDB;
+  if (getArg('proxy')) {
+    ThisPouchDB = require('http-pouchdb')(PouchDB, getArg('proxy'));
+  } else {
+    ThisPouchDB = PouchDB.defaults(opts);
+  }
+  pouchDBApp.setPouchDB(ThisPouchDB);
+}
 
 updatePouchDB();
 

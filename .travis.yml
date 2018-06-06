@@ -4,7 +4,7 @@ node_js:
   - "6"
 
 sudo: false
-  
+
 git:
   depth: 30
 
@@ -12,6 +12,10 @@ addons:
   firefox: "47.0.2"
 
 script: travis_retry npm run $COMMAND
+
+before_install:
+- npm install -g npm@latest
+- npm -v
 
 before_script:
   # Our test-browser.js script uses FIREFOX_BIN to find the Firefox binary
@@ -55,7 +59,7 @@ env:
 
   # Test against the couchdb harness
   - COMMAND=test-couchdb
- 
+
 matrix:
   fast_finish: true
   include:
@@ -70,6 +74,7 @@ matrix:
 branches:
   only:
   - master
+  - /^greenkeeper/.*$/
 
 cache:
   directories:
