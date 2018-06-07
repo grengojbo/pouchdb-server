@@ -4,7 +4,7 @@ const express  = require('express');
 const favicon  = require('serve-favicon');
 const path     = require('path');
 const mkdirp   = require('mkdirp');
-const nomnom   = require('nomnom');
+const nomnom   = require('@gerhobbelt/nomnom');
 const wordwrap = require('wordwrap');
 const killable = require('killable');
 const tailLog  = require('./logging');
@@ -140,7 +140,7 @@ const args = nomnom
     [
       "  Starts up a pouchdb-server that talks to Redis, on localhost:6379.",
       "  Requires: npm install redisdown"
-    ].join('\n')
+    ].join('\n'),
       "",
       "  pouchdb-server --sqlite",
       [
