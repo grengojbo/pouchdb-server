@@ -17,7 +17,7 @@
   "bin": {
     "pouchdb-server": "./bin/pouchdb-server"
   },
-  "version": "4.0.1",
+  "version": "4.1.0",
   "scripts": {
     "unit-tests": "./bin/unit-tests.sh",
     "test-pouchdb": "./bin/test-setup.sh && ./bin/test-pouchdb.sh",
@@ -127,7 +127,8 @@
     "uglify-es": "^3.3.9"
   },
   "optionalDependencies": {
-    "pouchdb-adapter-node-websql": "^7.0.0"
+    "pouchdb-adapter-node-websql": "^7.0.0",
+    "pouchdb-adapter-leveldb": "^7.0.0"
   },
   "browserPackages": {
     "http-pouchdb": "buildHTTPPouchDB",
