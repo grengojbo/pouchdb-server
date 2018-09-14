@@ -27,7 +27,7 @@ ADD packages ${appDir}/packages
 
 RUN apt-get -qq update && \
     apt-get -y --no-install-recommends install g++ python make git wget apt-utils && \
-    npm install --no-package-lock --production && \
+    npm install --no-package-lock --production && npm audit fix \
     apt-get -y purge g++ make python git apt-utils && \
     apt-get -y autoremove && \
     apt-get -y autoclean

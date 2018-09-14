@@ -47,4 +47,4 @@ build/Release
 variable.mak
 /db/*
 /data/*
-.idea
+.idea/

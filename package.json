@@ -60,7 +60,6 @@
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
     "multiparty": "^4.2.0",
-    "object-assign": "^4.1.1",
     "on-finished": "^2.3.0",
     "pouchdb-adapter-http": "^7.0.0",
     "pouchdb-adapter-leveldb": "^7.0.0",
