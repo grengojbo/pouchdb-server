@@ -18,7 +18,42 @@ const PouchDB  = require('pouchdb-core')
   .plugin(require('pouchdb-mapreduce'))
   .plugin(require('pouchdb-find'));
 
-// parse command line arguments
+
+let server;
+const rebind = () => {
+    server.kill(listen);
+};
+
+// determine PouchDB instance
+const updatePouchDB = () => {
+    let opts = {};
+
+    opts.prefix = path.resolve(getArg('dir')) + path.sep;
+    mkdirp.sync(opts.prefix);
+
+    if (getArg('level-prefix')) {
+        opts.prefix = getArg('level-prefix');
+    }
+    // if (getArg('in-memory')) {
+    //   PouchDB.plugin(require('pouchdb-adapter-memory'));
+    // } else
+    if (getArg('level-backend')) {
+        PouchDB.plugin(customLevelAdapter(require(getArg('level-backend'))));
+        opts.url = process.env.LEVEL_DOWN_URL; // example could be the redis url
+        // } else if (getArg('sqlite')) {
+        //   PouchDB.plugin(require('pouchdb-adapter-node-websql'));
+    } else {
+        PouchDB.plugin(require('pouchdb-adapter-leveldb'));
+    }
+
+    let ThisPouchDB;
+    if (getArg('proxy')) {
+        ThisPouchDB = require('http-pouchdb')(PouchDB, getArg('proxy'));
+    } else {
+        ThisPouchDB = PouchDB.defaults(opts);
+    }
+    pouchDBApp.setPouchDB(ThisPouchDB);
+};
 
 const options = {
   port: {
@@ -208,35 +243,7 @@ restartTailingLog();
 // cors
 app.use(cors(config));
 
-// determine PouchDB instance
-function updatePouchDB() {
-  var opts = {};
 
-  opts.prefix = path.resolve(getArg('dir')) + path.sep;
-  mkdirp.sync(opts.prefix);
-
-  if (getArg('level-prefix')) {
-    opts.prefix = getArg('level-prefix');
-  }
-  if (getArg('in-memory')) {
-    PouchDB.plugin(require('pouchdb-adapter-memory'));
-  } else if (getArg('level-backend')) {
-    PouchDB.plugin(customLevelAdapter(require(getArg('level-backend'))));
-    opts.url = process.env.LEVEL_DOWN_URL; // example could be the redis url
-  } else if (getArg('sqlite')) {
-    PouchDB.plugin(require('pouchdb-adapter-node-websql'));
-  } else {
-    PouchDB.plugin(require('pouchdb-adapter-leveldb'));
-  }
-
-  var ThisPouchDB;
-  if (getArg('proxy')) {
-    ThisPouchDB = require('http-pouchdb')(PouchDB, getArg('proxy'));
-  } else {
-    ThisPouchDB = PouchDB.defaults(opts);
-  }
-  pouchDBApp.setPouchDB(ThisPouchDB);
-}
 
 updatePouchDB();
 
@@ -265,7 +272,7 @@ app.use((err, req, res) => {
     res.send();
 });
 
-let server;
+
 
 function listen() {
   loggingReady.then(listenImpl);
@@ -315,10 +322,6 @@ function listenImpl() {
   });
 }
 
-function rebind() {
-  server.kill(listen);
-}
-
 listen();
 
 // handle exit
@@ -346,4 +349,4 @@ process.on('SIGTERM', () => {
 //             logger.error('Server close')
 //             process.exit(-1)
 //         })
-})
+});

@@ -3,15 +3,15 @@
 const CoreLevelPouch = require('pouchdb-adapter-leveldb-core');
 
 // create a PouchDb plugin from any *down database
-function customLevelAdapter(db) {
+const customLevelAdapter = (db) => {
 
-  function CustomLevelPouch(opts, callback) {
+  const CustomLevelPouch = (opts, callback) => {
     const _opts = Object.assign({
       db: db
     }, opts);
 
     CoreLevelPouch.call(this, _opts, callback);
-  }
+  };
 
   CustomLevelPouch.valid = () => true;
   CustomLevelPouch.use_prefix = false;
@@ -19,6 +19,6 @@ function customLevelAdapter(db) {
   return function (PouchDB) {
     PouchDB.adapter('custom-leveldb', CustomLevelPouch, true);
   };
-}
+};
 
 module.exports = customLevelAdapter;

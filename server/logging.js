@@ -19,7 +19,7 @@ parser.on('message', (msg) => {
   console.log.apply(console, args);
 });
 
-const levelColor = (level) => {
+const levelColor = level => {
     return {
         info: colors.green,
         debug: colors.cyan,
@@ -31,14 +31,14 @@ const levelColor = (level) => {
     };
 };
 
-const fmtLevel = (level) => {
+const fmtLevel = level => {
   const text = '[' + (level || 'other') + ']';
   return levelColor(level)(text);
 };
 
-const fmtStatusCode = (statusCode) => statusCodeColor(statusCode)(statusCode);
+const fmtStatusCode = statusCode => statusCodeColor(statusCode)(statusCode);
 
-const statusCodeColor = (status) => {
+const statusCodeColor = status => {
   if (status >= 500) {
     return colors.red;
   }
@@ -57,7 +57,7 @@ module.exports = function tailLog(path) {
   // stdout as parser output.
 
   const startTailing = () => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       fs.exists(path, (exists) => {
         if (!exists) {
           // try again in a bit

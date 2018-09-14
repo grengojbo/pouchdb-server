@@ -65,7 +65,6 @@
     "pouchdb-adapter-http": "^7.0.0",
     "pouchdb-adapter-leveldb": "^7.0.0",
     "pouchdb-adapter-leveldb-core": "^7.0.0",
-    "pouchdb-adapter-memory": "^7.0.0",
     "pouchdb-all-dbs": "^1.0.2",
     "pouchdb-auth": "file:packages/node_modules/pouchdb-auth",
     "pouchdb-bulkdocs-wrapper": "file:packages/node_modules/pouchdb-bulkdocs-wrapper",
@@ -127,7 +126,6 @@
     "uglify-es": "^3.3.9"
   },
   "optionalDependencies": {
-    "pouchdb-adapter-node-websql": "^7.0.0",
     "pouchdb-adapter-leveldb": "^7.0.0"
   },
   "browserPackages": {
