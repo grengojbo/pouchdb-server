@@ -29,7 +29,6 @@
   "dependencies": {
     "@gerhobbelt/nomnom": "^1.8.4-24",
     "abstract-leveldown": "^5.0.0",
-    "babel-core": "^6.26.3",
     "base64url": "^3.0.0",
     "basic-auth": "^2.0.0",
     "basic-authorization-header": "^0.2.7",
@@ -53,8 +52,9 @@
     "extend": "^3.0.2",
     "get-folder-size": "^2.0.0",
     "header-case-normalizer": "^1.0.3",
-    "http-pouchdb": "^4.0.1",
+    "http-pouchdb": "file:packages/node_modules/http-pouchdb",
     "is-empty": "^1.2.0",
+    "jsonwebtoken": "^8.3.0",
     "killable": "^1.0.0",
     "lodash": "^4.17.10",
     "minimatch": "^3.0.4",
